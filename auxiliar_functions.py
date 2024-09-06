@@ -4,13 +4,13 @@ from models.knapsackModel import KnapSack
 from models.populationModel import Population
 from models.individualModel import Individual
 from typing import Union
-#-------------------------------------- PRINT'S INFORMATION
+
 class AuxiliarFunctions: 
 
-    '''
-    Function to return the number of '\t' neccesary for a responsive table. 
-    '''
-    def adaptative_tab(self, arraySize: int):    
+#-------------------------------------- Print 
+
+    def adaptative_tab(self, arraySize: int):   
+        ''' Function to return the number of '\t' neccesary for a responsive table. ''' 
         if arraySize <= 5:
             return '\t' * int(arraySize / 2)
         else: 
@@ -24,7 +24,6 @@ class AuxiliarFunctions:
         for index, individual in enumerate(Population):
             print(f"{index}\t{individual}{self.adaptative_tab(POPULATION.genotypeLength)}{ObjectiveFunctionArray[index]}\t{weigthArray[index]} ")
             
-            
     def print_punishment_population_info(self, POPULATION: Population):
         Population = POPULATION.individuals
         ObjectiveFunctionArray = POPULATION.individualsObjetiveFunctions
@@ -33,7 +32,6 @@ class AuxiliarFunctions:
         for index, individual in enumerate(Population):
             print(f"{index}\t{individual}{self.adaptative_tab(POPULATION.genotypeLength)}{ObjectiveFunctionArray[index]}\t{weigthArray[index]} ")
             
-
     def print_individual_info(self, indv:Individual):
         indv, ObjFunc, Weight = indv.genotype, indv.fenotype, indv.weight
         print(f"\n[yellow]Individual {self.adaptative_tab(indv.size)} O.F \t Weight")
@@ -61,7 +59,7 @@ class AuxiliarFunctions:
         
         print("\n\n[yellow]--------------------------------------------------\n\n")
     
-    #-------------------------------------- GENERAL
+    #-------------------------------------- General
 
     def calculate_ObjFuncVector(self, PopOrInd: Union[Population, Individual], ks: KnapSack):
         if isinstance(PopOrInd, Population):
@@ -75,7 +73,15 @@ class AuxiliarFunctions:
         elif isinstance(PopOrInd, Individual):
             return PopOrInd.genotype.dot(ks.ItemsWeights)
 
-    #-------------------------------------- EVALUATION
+    #-------------------------------------- Evaluation
+    
+    def punish_individual(self, indv:Individual, ks:KnapSack):
+        AdapFunc=indv.fenotype
+        if indv.weight > ks.MaxCapacity:
+            print("[red]The individial has been punished")
+            AdapFunc = indv.fenotype - indv.weight
+        else: print("[red]The individial hasn't been punished")
+        return AdapFunc
 
     def w_m_c(self, weightIndividual, knapsackCapacity):
         return 1 if weightIndividual > knapsackCapacity else 0
@@ -104,15 +110,8 @@ class AuxiliarFunctions:
                 population[index] = self.repair_individual(individual, individualWeight, knapsackCapacity, knapsackItemsWeight)
         return population
         
-    def punish_individual(self, indv:Individual, ks:KnapSack):
-        AdapFunc=indv.fenotype
-        if indv.weight > ks.MaxCapacity:
-            print("[red]The individial has been punished")
-            AdapFunc = indv.fenotype - indv.weight
-        else: print("[red]The individial hasn't been punished")
-        return AdapFunc
 
-    #-------------------------------------- PARENTS SELECTION
+    #-------------------------------------- Parents Selection
 
     def get_parent_index_random(self, KnapsackItemQuantity, randomSeed: int):
         return np.random.randint(0, KnapsackItemQuantity)
