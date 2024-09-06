@@ -5,9 +5,11 @@ from models.populationModel import Population
 from models.individualModel import Individual
 from rich import print
 
+np.random.seed(0) #Para mantener estático el mismo caso. 
+
 aux = AuxiliarFunctions()
 def printTittle(message:str):
-    print(f"[magenta]\n\n---\n{message}\n---\n\n")
+    print(f"[magenta]\n{message}\n")
 
 printTittle(" ----------------------------------- 1. Población Inicial")
 
@@ -17,7 +19,7 @@ ItemsBeneficits = np.array([51, 36, 83, 65, 40])
 ItemsWeights = np.array([30, 38, 54, 21, 32])
 MaxCapacity = 110
 mutationRate = 0.02
-crossingRate = 1/SolutionsQuantity
+crossingRate = 0.8
 
 knapsack = KnapSack(KnapsackItemsQuantity, SolutionsQuantity, ItemsBeneficits, ItemsWeights, MaxCapacity)
 aux.print_knapsack_info(knapsack)
@@ -26,18 +28,14 @@ aux.print_knapsack_info(knapsack)
 POPULATION = Population(knapsack)  
 POPULATION.set_individuals_objFunc(aux.calculate_ObjFuncVector(POPULATION, knapsack))   
 POPULATION.set_individuals_weights(aux.calculate_WeightVector(POPULATION, knapsack))
-aux.print_population_info_1(POPULATION)
-
-
+aux.print_population_info(POPULATION)
 
 printTittle(" -----------------------------------  2. Evaluacion de la población (Castigo)")
-
 
 adaptativeFunction = aux.punish_population(POPULATION, knapsack)
 POPULATION.set_individuals_objFunc(adaptativeFunction)
 
 aux.print_punishment_population_info(POPULATION)
-
 
 printTittle(" -----------------------------------  3. Selección de los padres")
 
@@ -52,41 +50,29 @@ aux.print_parents(parent1.genotype, parent2.genotype, indexParent1, indexParent2
 
 printTittle(" -----------------------------------  4. Cruzamiento de los 2 padres")
 
-children = Individual(aux.cross_parents_upx(parent1, parent2, 0))
-children.set_fenotype(aux.calculate_ObjFuncVector(children, knapsack))
-children.set_weight(aux.calculate_WeightVector(children, knapsack))
+child = Individual(aux.cross_parents_upx(parent1, parent2, 0))
+child.set_fenotype(aux.calculate_ObjFuncVector(child, knapsack))
+child.set_weight(aux.calculate_WeightVector(child, knapsack))
 
-aux.print_individual_info(children)
+aux.print_individual_info("El hijo es: ",child)
 
 printTittle(" -----------------------------------  5. Mutacion del hijo")
 
-children.set_genotype(aux.mutate_binary_individual(children, mutationRate, 0))  
-children.set_fenotype(aux.calculate_ObjFuncVector(children,knapsack))
-children.set_weight(aux.calculate_WeightVector(children,knapsack))
+child.set_genotype(aux.mutate_binary_individual(child, mutationRate, 0))  
+child.set_fenotype(aux.calculate_ObjFuncVector(child,knapsack))
+child.set_weight(aux.calculate_WeightVector(child,knapsack))
 
-aux.print_individual_info(children)
-
+aux.print_individual_info("HijoMutado:",child)
 
 printTittle(" -----------------------------------  6. Evaluacion del hijo (Castigo)")
 
-
-children.set_fenotype(aux.punish_individual(children,knapsack))
-aux.print_individual_info(children)
-
-
-'''
-7. Actualizar población
-
-Se toma de referencia al peor individuo de la población (el individuo factible que tenga la funcion objetivo mas baja)
-
-Si el hijo es mejor que el peor de la población, el hijo reemplaza su lugar como nuevo integrante de la población.
-
-
-'''
+child.set_fenotype(aux.punish_individual(child,knapsack))   #Si el individuo es factible, no resulta castigado.
+aux.print_individual_info("HijoEvaluado:", child)
 
 printTittle(" ----------------------------------- 7. Actualizar la población")
 
-print("El porcentaje de cruzamiento es: ", crossingRate)
+POPULATION.individuals = aux.try_update_population(POPULATION, child) #Se intenta actualizar la población con el hijo (Si es hijo no es mejor que el peor de la población, se falla el intento y no se actualiza nada.)
+aux.print_population_info(POPULATION)
 
 '''
 8. Incumbente
@@ -95,6 +81,7 @@ Se busca al mejor individuo de la población en una determinada generacion
 '''
 printTittle(" ----------------------------------- 8. Incumbente de la población")
 
+print(f"El porcentaje de cruzamiento es: {crossingRate*100}%, con una población total de: {knapsack.IndividualsQuantity}, la cantidad de iteraciones será de: [green]{crossingRate*knapsack.IndividualsQuantity}\n", )
 
 '''
 9. Gráfica

@@ -4,8 +4,26 @@ from models.knapsackModel import KnapSack
 from models.populationModel import Population
 from models.individualModel import Individual
 from typing import Union
+import argparse
+
+# Procesar los argumentos de la línea de comandos
+parser = argparse.ArgumentParser(description='Activate debug mode')
+parser.add_argument('-d', '--debug', action='store_true', help='Activate debug mode')
+args = parser.parse_args()
+
+# Variable para controlar el modo debug
+debugMode = args.debug
+
+# Guardamos una referencia a la función original de print
+old_print = print
+
+# Sobrecargamos la función print
+def print(*args, **kwargs):
+    if debugMode:
+        old_print(*args, **kwargs)
 
 class AuxiliarFunctions: 
+
 
 #-------------------------------------- Print 
 
@@ -16,13 +34,13 @@ class AuxiliarFunctions:
         else: 
             return '\t' * (int(arraySize / 2) - 1)
 
-    def print_population_info_1(self, POPULATION: Population):
-        Population = POPULATION.individuals
-        ObjectiveFunctionArray = POPULATION.individualsObjetiveFunctions
-        weigthArray = POPULATION.individualsWeights
-        print(f"\n[yellow]NUMBER\tINDIVIDUAL{self.adaptative_tab(POPULATION.genotypeLength)}O.F \tWEIGHT")
+    def print_population_info(self, pop: Population):
+        Population = pop.individuals
+        ObjectiveFunctionArray = pop.individualsObjetiveFunctions
+        weigthArray = pop.individualsWeights
+        print(f"\n[yellow]NUMBER\tINDIVIDUAL{self.adaptative_tab(pop.genotypeLength)}O.F \tWEIGHT")
         for index, individual in enumerate(Population):
-            print(f"{index}\t{individual}{self.adaptative_tab(POPULATION.genotypeLength)}{ObjectiveFunctionArray[index]}\t{weigthArray[index]} ")
+            print(f"{index}\t{individual}{self.adaptative_tab(pop.genotypeLength)}{ObjectiveFunctionArray[index]}\t{weigthArray[index]} ")
             
     def print_punishment_population_info(self, POPULATION: Population):
         Population = POPULATION.individuals
@@ -32,9 +50,9 @@ class AuxiliarFunctions:
         for index, individual in enumerate(Population):
             print(f"{index}\t{individual}{self.adaptative_tab(POPULATION.genotypeLength)}{ObjectiveFunctionArray[index]}\t{weigthArray[index]} ")
             
-    def print_individual_info(self, indv:Individual):
+    def print_individual_info(self, title:str, indv:Individual):
         indv, ObjFunc, Weight = indv.genotype, indv.fenotype, indv.weight
-        print(f"\n[yellow]Individual {self.adaptative_tab(indv.size)} O.F \t Weight")
+        print(f"\n[yellow]{title} {self.adaptative_tab(indv.size)} O.F \t Weight")
         print(f"{indv} {self.adaptative_tab(indv.size-1)} {ObjFunc} \t {Weight} \n\n")
 
     def print_parents(self, p1: Individual, p2: Individual, index1, index2):
@@ -125,7 +143,7 @@ class AuxiliarFunctions:
         parentIndex = np.argmin(conditionList)
         return parentIndex
 
-    #-------------------------------------- Cruzamiento 
+    #-------------------------------------- Crossing 
 
     def cross_parents_upx(self, p1, p2, randomSeed: int):
         parent1, parent2 = p1.genotype, p2.genotype 
@@ -143,7 +161,7 @@ class AuxiliarFunctions:
                 children.append(parent2[i])
         return np.array(children)
 
-    #-------------------------------------- Mutacion
+    #-------------------------------------- Mutation
 
     def mutate_binary_individual(self, indiv: Individual, MutationRate, RandomSeed: int):
         np.random.seed(RandomSeed)
@@ -156,3 +174,23 @@ class AuxiliarFunctions:
         else:
             print("[red]The individual hasn't been mutated")
         return indiv.genotype
+
+
+    #-------------------------------------- Updating Population
+    
+    def get_worst_individual_index(self, pop: Population) -> int:
+        return np.argmin(pop.individualsObjetiveFunctions)
+
+    def try_update_population(self, pop:Population, child: Individual):
+        index = self.get_worst_individual_index(pop)
+
+        if child.fenotype > pop.individualsObjetiveFunctions[index]:
+            print("[green]The generation was improved")
+            pop.individuals[index] = child.genotype
+            pop.individualsObjetiveFunctions[index] = child.fenotype
+            pop.individualsWeights[index] = child.weight
+        else:
+            print("[red]Lost")
+
+            
+        return pop.individuals
