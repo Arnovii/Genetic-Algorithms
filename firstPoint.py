@@ -9,21 +9,36 @@ import matplotlib.pyplot as plt
 
 
 
-def printTittle(message:str):
-    if debugMode:
-        print(f"[magenta]\n{message}\n")
+
+
+
+'''       Name:     cycle_of_life
+    Parameters:   
+                    -POPULATION: Instancia de la clase Population que contiene toda la información relacionada a la población de individuos
+                    -knapsack:   Instancia de la clase KnapSack que contiene toda la información relacionada a la Mochila
+                    -aux:        Instancia de la clase AuxiliarFunctions, nos permite utilizar los métodos que esten dentro de esta clase.
+        
+        Objetive:   Esta función principalmente se encarga de recibir una población inicial junto con los parámetros de la mochila, ejecutar el ciclo de vida y retornar el incumbente de toda una generación.
+                    Aplicar todo el ciclo de vida de una generación:
+                    1. Evaluación a la población
+                    2. Selección de Padres
+                    3. Cruzamiento de Padres (Nacimiento del hijo)
+                    4. Mutación del hijo
+                    5. Evaluación del hijo
+                    6. Actualizar población
+                    7. Seleccion de incumbente      '''
 
 def cycle_of_life(POPULATION:Population, knapsack:KnapSack, aux:AuxiliarFunctions):
     np.random.seed(0) #Para mantener estático el mismo caso. 
     
-    printTittle(" -----------------------------------  2. Evaluacion de la población (Castigo)")
+    aux.printTittle(" -----------------------------------  2. Evaluacion de la población (Castigo)")
 
     adaptativeFunction = aux.punish_population(POPULATION, knapsack)
     POPULATION.set_individuals_objFunc(adaptativeFunction)
 
     aux.print_punishment_population_info(POPULATION)
 
-    printTittle(" -----------------------------------  3. Selección de los padres")
+    aux.printTittle(" -----------------------------------  3. Selección de los padres")
 
     indexParent1 = aux.get_parent_index_roulette(POPULATION.individualsObjetiveFunctions, 0)
     indexParent2 = aux.get_parent_index_roulette(POPULATION.individualsObjetiveFunctions, 1)
@@ -34,7 +49,7 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack, aux:AuxiliarFunction
     aux.print_parents(parent1.genotype, parent2.genotype, indexParent1, indexParent2)
 
 
-    printTittle(" -----------------------------------  4. Cruzamiento de los 2 padres")
+    aux.printTittle(" -----------------------------------  4. Cruzamiento de los 2 padres")
 
     child = Individual(aux.cross_parents_upx(parent1, parent2, 0))
     child.set_fenotype(aux.calculate_ObjFuncVector(child, knapsack))
@@ -42,7 +57,7 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack, aux:AuxiliarFunction
 
     aux.print_individual_info("El hijo es: ",child)
 
-    printTittle(" -----------------------------------  5. Mutacion del hijo")
+    aux.printTittle(" -----------------------------------  5. Mutacion del hijo")
 
     child.set_genotype(aux.mutate_binary_individual(child, knapsack.mutationRate, 0))  
     child.set_fenotype(aux.calculate_ObjFuncVector(child,knapsack))
@@ -50,12 +65,12 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack, aux:AuxiliarFunction
 
     aux.print_individual_info("HijoMutado:",child)
 
-    printTittle(" -----------------------------------  6. Evaluacion del hijo (Castigo)")
+    aux.printTittle(" -----------------------------------  6. Evaluacion del hijo (Castigo)")
 
     child.set_fenotype(aux.punish_individual(child,knapsack))   #Si el individuo es factible, no resulta castigado.
     aux.print_individual_info("HijoEvaluado:", child)
 
-    printTittle(" ----------------------------------- 7. Actualizar la población")
+    aux.printTittle(" ----------------------------------- 7. Actualizar la población")
 
     POPULATION.individuals = aux.try_update_population(POPULATION, child) #Se intenta actualizar la población con el hijo (Si es hijo no es mejor que el peor de la población, se falla el intento y no se actualiza nada.)
     aux.print_population_info(POPULATION)
@@ -65,7 +80,7 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack, aux:AuxiliarFunction
 
     Se busca al mejor individuo de la población en una determinada generacion
     '''
-    printTittle(" ----------------------------------- 8. Incumbente de la población")
+    aux.printTittle(" ----------------------------------- 8. Incumbente de la población")
 
     icmbt_index = aux.get_best_individual_index(POPULATION)
     incumbent = Individual(POPULATION.individuals[icmbt_index])
@@ -76,12 +91,16 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack, aux:AuxiliarFunction
 
 
 
-
+'''       Name:    main
+    Parameters:    No recibe parámetros
+      Objetive:    Inicializar los parámetros de la población (POPULATION) y de la mochila (knapsack)
+                   En su interior, a través de un ciclo se realizan la cantidad de generaciones correspondientes a la taza de crecimiento, y a su vez por cada
+                   iteración conseguimos el incumbente (gracias a cycle_of_life)    '''
 def main():
     aux = AuxiliarFunctions()
     np.random.seed(34343)
 
-    printTittle(" ----------------------------------- 1. Población Inicial")
+    aux.printTittle(" ----------------------------------- 1. Población Inicial")
     
     KnapsackItemsQuantity = 5   #Longitud de las soluciones
     SolutionsQuantity = 10      #Cantidad de soluciones
@@ -107,6 +126,7 @@ def main():
     fenotype_list = []
 
     for i in range(int(generations)):
+        debugMode and print(f"\n[red]---GENERACIÓN #{i}\n")
         icmbt_index = cycle_of_life(POPULATION, knapsack, aux)
         generations_list.append(i)
         fenotype_list.append(icmbt_index.fenotype)
@@ -115,8 +135,8 @@ def main():
     plt.plot(generations_list, fenotype_list, marker='o', linestyle='-', color='b')
 
 
-    printTittle(" ----------------------------------- 9. Gráfica | Incumbentes vs Generaciones")
-    print(f"El porcentaje de cruzamiento es: {crossingRate*100}%, con una población total de: {knapsack.IndividualsQuantity}, la cantidad de generaciones seran: [green]{crossingRate*knapsack.IndividualsQuantity}\n", )
+    aux.printTittle(" ----------------------------------- 9. Gráfica | Incumbentes vs Generaciones")
+    print(f"[yellow]\n\nEl porcentaje de cruzamiento es: [cyan]{crossingRate*100}%,[yellow] con una población total de: [cyan]{knapsack.IndividualsQuantity},[yellow] la cantidad de generaciones seran: [cyan]{crossingRate*knapsack.IndividualsQuantity}\n", )
 
     plt.xlabel('$generations$')
     plt.ylabel('$objectiveFunction$')

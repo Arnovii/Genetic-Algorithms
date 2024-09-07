@@ -22,9 +22,11 @@ def print(*args, **kwargs):
     if debugMode:
         old_print(*args, **kwargs)
 
+
+
+'''       Name:    AuxiliarFunctions
+      Objetive:    Esta clase se encarga de contener métodos útiles para los algoritmos genéticos.    '''
 class AuxiliarFunctions: 
-
-
 #-------------------------------------- Print 
 
     def adaptative_tab(self, arraySize: int):   
@@ -77,7 +79,9 @@ class AuxiliarFunctions:
         
         print("\n\n[yellow]--------------------------------------------------\n\n")
     
-    #-------------------------------------- General
+    def printTittle(self, message:str):
+            print(f"[magenta]\n{message}\n")
+#-------------------------------------- General
 
     def calculate_ObjFuncVector(self, PopOrInd: Union[Population, Individual], ks: KnapSack):
         if isinstance(PopOrInd, Population):
@@ -91,7 +95,7 @@ class AuxiliarFunctions:
         elif isinstance(PopOrInd, Individual):
             return PopOrInd.genotype.dot(ks.ItemsWeights)
 
-    #-------------------------------------- Evaluation
+#-------------------------------------- Evaluation
     
     def punish_individual(self, indv:Individual, ks:KnapSack):
         AdapFunc=indv.fenotype
@@ -119,12 +123,12 @@ class AuxiliarFunctions:
             print("[red]The population haven been punished")
         return adaptFuncArray
 
-    def repair_individual(self, individual, individualWeight, knapsackCapacity, knapsackItemsWeigth):
-        while individualWeight > knapsackCapacity:
-            randomGen = np.random.randint(0, individual.size)
-            individual[randomGen] = 0
-            individualWeight = self.calculate_WeightVector(individual, knapsackItemsWeigth)
-        return individual
+    def repair_individual(self, ind: Individual, ks: KnapSack):
+        while ind.weight > ks.MaxCapacity:
+            randomGen = np.random.randint(0, ind.genotype.size)
+            ind.genotype[randomGen] = 0
+            ind.weight = self.calculate_WeightVector(ind.genotype, ks.ItemsWeights)
+        return ind.genotype
 
     def repairPopulation(self, population, vectorWeightForPop, knapsackItemsWeight, knapsackCapacity):
         for index, individual in enumerate(population):
@@ -134,7 +138,7 @@ class AuxiliarFunctions:
         return population
         
 
-    #-------------------------------------- Parents Selection
+#-------------------------------------- Parents Selection
 
     def get_parent_index_random(self, KnapsackItemQuantity, randomSeed: int):
         return np.random.randint(0, KnapsackItemQuantity)
@@ -148,7 +152,7 @@ class AuxiliarFunctions:
         parentIndex = np.argmin(conditionList)
         return parentIndex
 
-    #-------------------------------------- Crossing 
+#-------------------------------------- Crossing 
 
     def cross_parents_upx(self, p1, p2, randomSeed: int):
         parent1, parent2 = p1.genotype, p2.genotype 
@@ -166,7 +170,7 @@ class AuxiliarFunctions:
                 children.append(parent2[i])
         return np.array(children)
 
-    #-------------------------------------- Mutation
+#-------------------------------------- Mutation
 
     def mutate_binary_individual(self, indiv: Individual, MutationRate, RandomSeed: int):
         np.random.seed(RandomSeed)
@@ -181,7 +185,7 @@ class AuxiliarFunctions:
         return indiv.genotype
 
 
-    #-------------------------------------- Updating Population
+#-------------------------------------- Updating Population
 
     
     def get_worst_individual_index(self, pop: Population) -> int:
@@ -200,7 +204,7 @@ class AuxiliarFunctions:
             print("[red]Lost generation")
         return pop.individuals
     
-    #-------------------------------------- Incumbent
+#-------------------------------------- Incumbent
     
     def get_best_individual_index(self, pop: Population) -> int:
         return np.argmax(pop.individualsObjetiveFunctions) 
