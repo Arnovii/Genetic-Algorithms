@@ -1,7 +1,7 @@
 Instructions to execute: 
 
 1. Install dependencies
-- pip install requeriments.txt
+- pip install -r requeriments.txt
 
 2. Execute firstPoint.py
 - py .\firstPoint.py
