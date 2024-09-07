@@ -98,7 +98,7 @@ class AuxiliarFunctions:
         if indv.weight > ks.MaxCapacity:
             print("[red]The individial has been punished")
             AdapFunc = indv.fenotype - indv.weight
-        else: print("[red]The individial hasn't been punished")
+        else: print("[green]The individial hasn't been punished")
         return AdapFunc
 
     def w_m_c(self, weightIndividual, knapsackCapacity):
@@ -112,6 +112,11 @@ class AuxiliarFunctions:
             itemList = O_F - individualWeight * self.w_m_c(individualWeight, maxCapacityKnapsack)
             finalList.append(itemList)
         adaptFuncArray = np.array(finalList)
+        
+        if (pop.individualsObjetiveFunctions.all() == adaptFuncArray.all()):
+            print("[green]The population haven't been punished")
+        else: 
+            print("[red]The population haven been punished")
         return adaptFuncArray
 
     def repair_individual(self, individual, individualWeight, knapsackCapacity, knapsackItemsWeigth):
@@ -172,17 +177,19 @@ class AuxiliarFunctions:
             indexMutatedGen = np.random.randint(0, indiv.genotype.size)
             indiv.genotype[indexMutatedGen] = 0 if indiv.genotype[indexMutatedGen] == 1 else 1
         else:
-            print("[red]The individual hasn't been mutated")
+            print("[green]The individual hasn't been mutated")
         return indiv.genotype
 
 
     #-------------------------------------- Updating Population
+
     
     def get_worst_individual_index(self, pop: Population) -> int:
         return np.argmin(pop.individualsObjetiveFunctions)
 
     def try_update_population(self, pop:Population, child: Individual):
         index = self.get_worst_individual_index(pop)
+        print("[blue]Índice peor individuo: ", index)
 
         if child.fenotype > pop.individualsObjetiveFunctions[index]:
             print("[green]The generation was improved")
@@ -190,7 +197,12 @@ class AuxiliarFunctions:
             pop.individualsObjetiveFunctions[index] = child.fenotype
             pop.individualsWeights[index] = child.weight
         else:
-            print("[red]Lost")
-
-            
+            print("[red]Lost generation")
         return pop.individuals
+    
+    #-------------------------------------- Incumbent
+    
+    def get_best_individual_index(self, pop: Population) -> int:
+        return np.argmax(pop.individualsObjetiveFunctions) 
+    
+    
