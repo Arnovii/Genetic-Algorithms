@@ -209,4 +209,18 @@ class AuxiliarFunctions:
     def get_best_individual_index(self, pop: Population) -> int:
         return np.argmax(pop.individualsObjetiveFunctions) 
     
-    
+
+#-------------------------------------- Second Point
+#Codificar los metodos generateItemsWeights generateItemsBeneficits generateMaxCapacity
+
+    def generateItemsWeights():
+        pass
+    def generateItemsBeneficits():
+        pass
+    def generateMaxCapacity():
+        pass
+
+
+
+#Instancia de la clase
+aux = AuxiliarFunctions()

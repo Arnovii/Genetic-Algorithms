@@ -1,15 +1,10 @@
 import numpy as np 
-from auxiliar_functions import AuxiliarFunctions, debugMode
+from auxiliar_functions import aux, debugMode
 from models.knapsackModel import KnapSack
 from models.populationModel import Population
 from models.individualModel import Individual
 from rich import print
 import matplotlib.pyplot as plt 
-
-
-
-
-
 
 
 '''       Name:     cycle_of_life
@@ -28,7 +23,7 @@ import matplotlib.pyplot as plt
                     6. Actualizar población
                     7. Seleccion de incumbente      '''
 
-def cycle_of_life(POPULATION:Population, knapsack:KnapSack, aux:AuxiliarFunctions):
+def cycle_of_life(POPULATION:Population, knapsack:KnapSack):
     np.random.seed(0) #Para mantener estático el mismo caso. 
     
     aux.printTittle(" -----------------------------------  2. Evaluacion de la población (Castigo)")
@@ -97,7 +92,7 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack, aux:AuxiliarFunction
                    En su interior, a través de un ciclo se realizan la cantidad de generaciones correspondientes a la taza de crecimiento, y a su vez por cada
                    iteración conseguimos el incumbente (gracias a cycle_of_life)    '''
 def main():
-    aux = AuxiliarFunctions()
+
     np.random.seed(34343)
 
     aux.printTittle(" ----------------------------------- 1. Población Inicial")
@@ -127,7 +122,7 @@ def main():
 
     for i in range(int(generations)):
         debugMode and print(f"\n[red]---GENERACIÓN #{i}\n")
-        icmbt_index = cycle_of_life(POPULATION, knapsack, aux)
+        icmbt_index = cycle_of_life(POPULATION, knapsack)
         generations_list.append(i)
         fenotype_list.append(icmbt_index.fenotype)
 
