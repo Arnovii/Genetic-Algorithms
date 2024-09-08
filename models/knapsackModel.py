@@ -1,7 +1,7 @@
 class KnapSack:
-     def __init__(self, IndividualsQuantity:int, ItemsQuantity:int, ItemsBeneficits, ItemsWeights, MaxCapacity:int, crossingRate: float, mutationRate:float, evaluativeMethod:str):
-         self.IndividualsQuantity = IndividualsQuantity
-         self.ItemsQuantity = ItemsQuantity 
+     def __init__(self, ItemsQuantity:int, IndividualsQuantity:int, ItemsBeneficits, ItemsWeights, MaxCapacity:int, crossingRate: float, mutationRate:float, evaluativeMethod:str):
+         self.ItemsQuantity = ItemsQuantity
+         self.IndividualsQuantity = IndividualsQuantity 
          self.ItemsBeneficits = ItemsBeneficits
          self.ItemsWeights =  ItemsWeights
          self.MaxCapacity = MaxCapacity

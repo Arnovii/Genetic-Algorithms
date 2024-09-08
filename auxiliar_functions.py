@@ -136,8 +136,8 @@ class AuxiliarFunctions:
         while ind.weight > ks.MaxCapacity:
             randomGen = np.random.randint(0, ind.genotype.size)
             ind.genotype[randomGen] = 0
-            ind.weight = self.calculate_WeightVector(ind, ks)
-            self.calculate_ObjFuncVector(ind,ks) #Con esto nos aseguramos que el individuo retornado esté totalmente actualizado tanto en peso como en fenotipo
+            ind.set_weight(self.calculate_WeightVector(ind, ks))
+            ind.set_fenotype(self.calculate_ObjFuncVector(ind,ks)) #Con esto nos aseguramos que el individuo retornado esté totalmente actualizado tanto en peso como en fenotipo
         return ind
     
     def repair_individual_for_genotype(self, indGenotype:np.ndarray, ks: KnapSack) -> np.ndarray:
@@ -182,7 +182,7 @@ class AuxiliarFunctions:
 
 #-------------------------------------- Crossing 
 
-    def cross_parents_upx(self, p1, p2, randomSeed: int):
+    def cross_parents_upx(self, p1, p2, randomSeed: int) -> np.ndarray:
         parent1, parent2 = p1.genotype, p2.genotype 
         np.random.seed(randomSeed)
         genotypeLength = parent1.size
@@ -259,8 +259,8 @@ class AuxiliarFunctions:
         beneficits_vector = np.random.choice(possibleValues, size=length, replace=True)
         return beneficits_vector
     
-    def generateMaxCapacity(self, itemsWeight: np.ndarray, alpha: float):
-        maxCapacity = np.cumsum(itemsWeight)*alpha
+    def generateMaxCapacity(self, itemsWeight: np.ndarray, alpha: float) -> float:
+        maxCapacity = (np.sum(itemsWeight))*alpha
         return maxCapacity
 
 

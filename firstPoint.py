@@ -5,7 +5,7 @@ from models.populationModel import Population
 from models.individualModel import Individual
 from rich import print
 import matplotlib.pyplot as plt 
-
+from data.parametersInfo import ParametersInformation
 
 '''       Name:     cycle_of_life
     Parameters:   
@@ -108,26 +108,54 @@ def main():
 
     aux.printTittle(" ----------------------------------- 1. Población Inicial")
     
-    KnapsackItemsQuantity = 5   #Longitud de las soluciones
-    SolutionsQuantity = 10      #Cantidad de soluciones
-    ItemsBeneficits = np.array([51, 36, 83, 65, 40])
-    ItemsWeights = np.array([30, 38, 54, 21, 32])
-    MaxCapacity = 110
-    mutationRate = 0.02
-    crossingRate = 0.8
-    evaluativeMethod = "r"
+    # KnapsackItemsQuantity = 5   #Longitud de las soluciones
+    # SolutionsQuantity = 10      #Cantidad de soluciones
+    # ItemsBeneficits = np.array([51, 36, 83, 65, 40])
+    # ItemsWeights = np.array([30, 38, 54, 21, 32])
+    # MaxCapacity = 110
+    # mutationRate = 0.02
+    # crossingRate = 0.8
+    # evaluativeMethod = "r"
 
+    '''-----------------------------------------------------------------------------------'''
+    data = ParametersInformation.data
+    print(data["0"]["N"])
+
+    heigth = aux.generateItemsBeneficitsVector(data["0"]["b_range"],data["0"]["n"])
+    weight = aux.generateItemsWeightsVector(data["0"]["w_range"],data["0"]["n"])
+    maxCap = aux.generateMaxCapacity(weight, data["0"]["alpha"])
+
+    print(heigth)
+    print(weight)
+    print(maxCap)
+    input()
+    KnapsackItemsQuantity = data["0"]["n"]
+    SolutionsQuantity = data["0"]["N"]      #Cantidad de soluciones
+    ItemsBeneficits = heigth
+    ItemsWeights = weight
+    MaxCapacity = maxCap
+    mutationRate = data["0"]["mutationRate"]
+    crossingRate = data["0"]["crossingRate"]
+    evaluativeMethod = data["0"]["evaluativeMethod"]
+
+    '''------------------------------------------------------------------'''
+
+
+
+
+    # knapsack = KnapSack(SolutionsQuantity, KnapsackItemsQuantity, ItemsBeneficits, ItemsWeights, MaxCapacity, crossingRate, mutationRate, evaluativeMethod)
     knapsack = KnapSack(KnapsackItemsQuantity, SolutionsQuantity, ItemsBeneficits, ItemsWeights, MaxCapacity, crossingRate, mutationRate, evaluativeMethod)
     aux.print_knapsack_info(knapsack)
     
     POPULATION = Population(knapsack)  
-    POPULATION.set_individuals_objFunc(aux.calculate_ObjFuncVector(POPULATION, knapsack))   
-    POPULATION.set_individuals_weights(aux.calculate_WeightVector(POPULATION, knapsack))
-
     print(POPULATION.individualsGenotypes.shape)
     print(knapsack.ItemsBeneficits.shape)
     print(knapsack.ItemsWeights.shape)
     input()
+    POPULATION.set_individuals_objFunc(aux.calculate_ObjFuncVector(POPULATION, knapsack))   
+    POPULATION.set_individuals_weights(aux.calculate_WeightVector(POPULATION, knapsack))
+
+
     
     aux.print_population_info(POPULATION)
     
