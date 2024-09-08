@@ -37,7 +37,7 @@ class AuxiliarFunctions:
             return '\t' * (int(arraySize / 2) - 1)
 
     def print_population_info(self, pop: Population):
-        Population = pop.individuals
+        Population = pop.individualsGenotypes
         ObjectiveFunctionArray = pop.individualsObjetiveFunctions
         weigthArray = pop.individualsWeights
         print(f"\n[yellow]NUMBER\tINDIVIDUAL{self.adaptative_tab(pop.genotypeLength)}O.F \tWEIGHT")
@@ -45,7 +45,7 @@ class AuxiliarFunctions:
             print(f"{index}\t{individual}{self.adaptative_tab(pop.genotypeLength)}{ObjectiveFunctionArray[index]}\t{weigthArray[index]} ")
             
     def print_punishment_population_info(self, POPULATION: Population):
-        Population = POPULATION.individuals
+        Population = POPULATION.individualsGenotypes
         ObjectiveFunctionArray = POPULATION.individualsObjetiveFunctions
         weigthArray = POPULATION.individualsWeights
         print(f"\n[yellow]NUMBER\tINDIVIDUAL{self.adaptative_tab(POPULATION.genotypeLength)}A.F \tWEIGHT")
@@ -63,20 +63,21 @@ class AuxiliarFunctions:
     def print_knapsack_info(self, knapsack: KnapSack):
         print("[yellow] \n\n --- KNAPSACK PROBLEM ------------------------------ \n\n ")
         numberOfGens = knapsack.ItemsQuantity
-        beneficitVectorForItem = knapsack.ItemsBeneficits
-        weightVectorForItem = knapsack.ItemsWeights
+        beneficitVectorOfItems = knapsack.ItemsBeneficits
+        weightVectorOfItems = knapsack.ItemsWeights
         numberOfIndividuals = knapsack.IndividualsQuantity
         knapsackMaxCapacity = knapsack.MaxCapacity
-        
+        knapsackEvaluativeMethod = knapsack.evaluativeMethod
         print(f"[yellow]\tknapsackMaxCapacity: \t\t[green] {knapsackMaxCapacity}")
         print(f"[yellow]\tNumber of gens: \t\t[green] {numberOfGens}")
         print("[yellow]\tItems: \t\t\t\t ", end="")
-        for i in range(1, numberOfIndividuals + 1):
-            print(f"[green]{i}", end=" ")
+        for item in range(1, numberOfIndividuals + 1):
+            print(f"[green]{item}", end=" ")
         
-        print(f"\n[yellow]\tVector of Beneficits:\t\t [green]{beneficitVectorForItem}")
-        print(f"[yellow]\tVector of weight:\t\t [green]{weightVectorForItem}")
-        
+        print(f"\n[yellow]\tVector of Beneficits:\t\t [green]{beneficitVectorOfItems}")
+        print(f"[yellow]\tVector of weight:\t\t [green]{weightVectorOfItems}")
+        print(f"[yellow]\tEvaluative Method:\t\t [green]{knapsackEvaluativeMethod}")
+
         print("\n\n[yellow]--------------------------------------------------\n\n")
     
     def printTittle(self, message:str):
@@ -85,19 +86,19 @@ class AuxiliarFunctions:
 
     def calculate_ObjFuncVector(self, PopOrInd: Union[Population, Individual], ks: KnapSack):
         if isinstance(PopOrInd, Population):
-            return PopOrInd.individuals.dot(ks.ItemsBeneficits) 
+            return PopOrInd.individualsGenotypes.dot(ks.ItemsBeneficits) 
         elif isinstance(PopOrInd, Individual):
             return PopOrInd.genotype.dot(ks.ItemsBeneficits)
             
     def calculate_WeightVector(self, PopOrInd: Union[Population, Individual], ks: KnapSack):
         if isinstance(PopOrInd, Population):
-            return PopOrInd.individuals.dot(ks.ItemsWeights) 
+            return PopOrInd.individualsGenotypes.dot(ks.ItemsWeights) 
         elif isinstance(PopOrInd, Individual):
             return PopOrInd.genotype.dot(ks.ItemsWeights)
 
 #-------------------------------------- Evaluation
     
-    def punish_individual(self, indv:Individual, ks:KnapSack):
+    def punish_individual(self, indv:Individual, ks:KnapSack) -> np.ndarray:
         AdapFunc=indv.fenotype
         if indv.weight > ks.MaxCapacity:
             print("[red]The individial has been punished")
@@ -108,7 +109,7 @@ class AuxiliarFunctions:
     def w_m_c(self, weightIndividual, knapsackCapacity):
         return 1 if weightIndividual > knapsackCapacity else 0
         
-    def punish_population(self, pop: Population, ks: KnapSack):
+    def punish_population(self, pop: Population, ks: KnapSack) ->np.ndarray:
         ObjFuncArray, WeightArray, maxCapacityKnapsack = pop.individualsObjetiveFunctions, pop.individualsWeights, ks.MaxCapacity
         finalList = []
         for index, O_F in enumerate(ObjFuncArray):
@@ -123,19 +124,46 @@ class AuxiliarFunctions:
             print("[red]The population haven been punished")
         return adaptFuncArray
 
-    def repair_individual(self, ind: Individual, ks: KnapSack):
+
+    # def repairPopulation(self, population, vectorWeightForPop, knapsackItemsWeight, knapsackCapacity):
+    #     for index, individual in enumerate(population):
+    #         individualWeight = vectorWeightForPop[index]
+    #         if individualWeight > knapsackCapacity:
+    #             population[index] = self.repair_individual(individual, individualWeight, knapsackCapacity, knapsackItemsWeight)
+    #     return population
+    
+    def repair_individual(self, ind: Individual, ks: KnapSack) -> Individual:
         while ind.weight > ks.MaxCapacity:
             randomGen = np.random.randint(0, ind.genotype.size)
             ind.genotype[randomGen] = 0
-            ind.weight = self.calculate_WeightVector(ind.genotype, ks.ItemsWeights)
-        return ind.genotype
+            ind.weight = self.calculate_WeightVector(ind, ks)
+            self.calculate_ObjFuncVector(ind,ks) #Con esto nos aseguramos que el individuo retornado esté totalmente actualizado tanto en peso como en fenotipo
+        return ind
+    
+    def repair_individual_for_genotype(self, indGenotype:np.ndarray, ks: KnapSack) -> np.ndarray:
+        #Individuo Temporal
+        tempIndv = Individual(indGenotype)
+        tempIndv.set_fenotype(self.calculate_ObjFuncVector(tempIndv, ks))
+        tempIndv.set_weight(self.calculate_WeightVector(tempIndv,ks))
 
-    def repairPopulation(self, population, vectorWeightForPop, knapsackItemsWeight, knapsackCapacity):
-        for index, individual in enumerate(population):
-            individualWeight = vectorWeightForPop[index]
-            if individualWeight > knapsackCapacity:
-                population[index] = self.repair_individual(individual, individualWeight, knapsackCapacity, knapsackItemsWeight)
-        return population
+        while tempIndv.weight > ks.MaxCapacity:
+            randomGen = np.random.randint(0, tempIndv.genotype.size)
+            tempIndv.genotype[randomGen] = 0
+            tempIndv.set_weight(self.calculate_WeightVector(tempIndv,ks))
+
+        return tempIndv.genotype
+
+    def repairPopulation(self, pop:Population, ks:KnapSack) -> Population:
+        for index, indGenotype in enumerate(pop.individualsGenotypes):
+            individualWeight = pop.individualsWeights[index]
+            if individualWeight > ks.MaxCapacity:
+                pop.individualsGenotypes[index] = self.repair_individual_for_genotype(indGenotype,ks)
+        
+        #Cuando termine el ciclo, es porque todos los genotipos se han reparado, es momento de actualizar los vectores de beneficio y peso
+        pop.set_individuals_objFunc(self.calculate_ObjFuncVector(pop,ks))
+        pop.set_individuals_weights(self.calculate_WeightVector(pop,ks))
+
+        return pop
         
 
 #-------------------------------------- Parents Selection
@@ -197,12 +225,12 @@ class AuxiliarFunctions:
 
         if child.fenotype > pop.individualsObjetiveFunctions[index]:
             print("[green]The generation was improved")
-            pop.individuals[index] = child.genotype
+            pop.individualsGenotypes[index] = child.genotype
             pop.individualsObjetiveFunctions[index] = child.fenotype
             pop.individualsWeights[index] = child.weight
         else:
             print("[red]Lost generation")
-        return pop.individuals
+        return pop.individualsGenotypes
     
 #-------------------------------------- Incumbent
     
@@ -213,12 +241,17 @@ class AuxiliarFunctions:
 #-------------------------------------- Second Point
 #Codificar los metodos generateItemsWeights generateItemsBeneficits generateMaxCapacity
 
-    def generateItemsWeights():
-        pass
-    def generateItemsBeneficits():
-        pass
-    def generateMaxCapacity():
-        pass
+    def generateItemsWeightsVector(self, possibleValues: np.ndarray, length: int):
+        print(type(possibleValues), length)
+        return possibleValues
+    
+    def generateItemsBeneficitsVector(self, possibleValues: np.ndarray, length: int):
+        print(type(possibleValues), length)
+        return possibleValues
+    
+    def generateMaxCapacity(self, itemsWeight: np.ndarray, alpha: float):
+        maxCapacity = np.cumsum(itemsWeight)*alpha
+        return maxCapacity
 
 
 

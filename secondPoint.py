@@ -2,6 +2,7 @@ from auxiliar_functions import aux, debugMode
 from models.knapsackModel import KnapSack
 from models.populationModel import Population
 from models.individualModel import Individual
+from data.parametersInfo import ParametersInformation
 import matplotlib.pyplot as plt 
 from rich import print
 import numpy as np 
@@ -13,31 +14,74 @@ import numpy as np
 
 #Codificar los metodos generateItemsWeights generateItemsBeneficits generateMaxCapacity
 
+def select_option(prmtrsInfo: dict) -> str:
+    first_key = next(iter(prmtrsInfo))
+    last_key = next(reversed(prmtrsInfo))
 
-def knapsack_instances(n, w_range, b_range, alpha) -> KnapSack:
-    weights = aux.generateItemsWeights(w_range)
-    beneficits = aux.generateItemsBeneficits(b_range)
-    capacity = aux.generateMaxCapacity(alpha)
+    print('[yellow]\n--------------BIENVENIDO\n\nInstancias disponibles:\n')
 
-    ks = KnapSack(ItemsQuantity= n,                      #Longitud de los individuos
-                  IndividualsQuantity= n*2,              #Cantidad de los individuos
-                  ItemsBeneficits= beneficits,           #Array de Beneficios
-                  ItemsWeights= weights,                 #Array de Pesos
-                  MaxCapacity= capacity,                 #Capacidad máxima de la mochila
-                  crossingRate= 0.8,                     #Porcentaje de cruzamiento del 80%
-                  mutationRate= 0.02,                    #Porcentaje de mutación del 2%
+    # Mostrar opciones disponibles al usuario
+    for instance_key, instance_info in prmtrsInfo.items():
+        print(f"\t[{instance_key}] - N: {instance_info['N']}, n: {instance_info['n']}, evaluative method: [cyan]{instance_info['evaluativeMethod']}")
+
+    # Solicitar al usuario que elija una opción
+    while True:
+        option = input(f"\nSeleccione una opción ({first_key}-{last_key}): ")
+        
+        if option in prmtrsInfo:
+            print(f"\nHa seleccionado la instancia {option} con N: {prmtrsInfo[option]['N']} y n: {prmtrsInfo[option]['n']}")
+            return option
+        else:
+
+            print(f"\n[red]Opción inválida. Por favor, seleccione una opción válida entre {first_key} y {last_key}.")
+
+def knapsack_instances(data:dict) -> KnapSack:
+
+    weights = aux.generateItemsWeightsVector(data["w_range"], data["n"])
+    beneficits = aux.generateItemsBeneficitsVector(data["b_range"], data["n"])
+    capacity = aux.generateMaxCapacity(weights, data["alpha"])
+
+    ks = KnapSack(ItemsQuantity= data["n"],                         #Longitud de los individuos
+                  IndividualsQuantity= data["N"],                   #Cantidad de los individuos
+                  ItemsBeneficits= beneficits,                      #Array de Beneficios
+                  ItemsWeights= weights,                            #Array de Pesos
+                  MaxCapacity= capacity,                            #Capacidad máxima de la mochila
+                  crossingRate= data["crossingRate"],               #Porcentaje de cruzamiento
+                  mutationRate= data["mutationRate"],               #Porcentaje de mutación
+                  evaluativeMethod= data["evaluativeMethod"]        #Método de evaluación (Reparar o Castigar)
                   )
-
     return ks
+
+def cycle_of_life(POPULATION, KNAPSACK, evaluativeMethod) -> Individual:
+    pass
 
 
 def main() -> None:
-    '''Un switch/case para seleccionar la instancia'''
-    '''Dependiendo de la instancia elegida, se hará la lectura en una estructura de datos/clase que contenga la informacón necesaria para rellenar knapsack_instances'''
-    '''con knapsack_instances crearemos la poblacion'''
-    ''' con ks y pop ya crearemos un algoritmo similar a cycle of life pero sin tanto print.'''
-    ''' Realizar el ciclo con las generaciones dependiendo de la taza de cruzamiento.'''
+    prmtrsInfo = ParametersInformation.data
+    option = select_option(prmtrsInfo)
+    debugMode and print(prmtrsInfo[option])
 
+    KNAPSACK = knapsack_instances(prmtrsInfo[option])
+    POPULATION = Population(KNAPSACK)
+
+    generations = KNAPSACK.crossingRate*KNAPSACK.IndividualsQuantity #retorna 4
+
+    # Listas para almacenar las generaciones y sus fenotipos
+    generations_list = []
+    fenotype_list = []
+
+    for i in range(int(generations)):
+        icmbt_index = cycle_of_life(POPULATION, KNAPSACK)
+        generations_list.append(i)
+        fenotype_list.append(icmbt_index.fenotype)
+
+    # Dibujar la línea en lugar de solo puntos
+    plt.plot(generations_list, fenotype_list, marker='o', linestyle='-', color='b')
+
+    plt.xlabel('$generations$')
+    plt.ylabel('$objectiveFunction$')
+    plt.grid()
+    plt.show()
 
 
 main()

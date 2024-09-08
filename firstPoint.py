@@ -28,18 +28,24 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack):
     
     aux.printTittle(" -----------------------------------  2. Evaluacion de la población (Castigo)")
 
-    adaptativeFunction = aux.punish_population(POPULATION, knapsack)
-    POPULATION.set_individuals_objFunc(adaptativeFunction)
+    if knapsack.evaluativeMethod == "p":
+        adaptativeFunction = aux.punish_population(POPULATION, knapsack)
+        POPULATION.set_individuals_objFunc(adaptativeFunction)
 
-    aux.print_punishment_population_info(POPULATION)
+        aux.print_punishment_population_info(POPULATION)
+    
+    elif knapsack.evaluativeMethod == "r":
+        POPULATION = aux.repairPopulation(POPULATION,knapsack)
+        aux.print_punishment_population_info(POPULATION)
+
 
     aux.printTittle(" -----------------------------------  3. Selección de los padres")
 
     indexParent1 = aux.get_parent_index_roulette(POPULATION.individualsObjetiveFunctions, 0)
     indexParent2 = aux.get_parent_index_roulette(POPULATION.individualsObjetiveFunctions, 1)
 
-    parent1 = Individual(POPULATION.individuals[indexParent1])
-    parent2 = Individual(POPULATION.individuals[indexParent2])
+    parent1 = Individual(POPULATION.individualsGenotypes[indexParent1])
+    parent2 = Individual(POPULATION.individualsGenotypes[indexParent2])
 
     aux.print_parents(parent1.genotype, parent2.genotype, indexParent1, indexParent2)
 
@@ -62,12 +68,17 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack):
 
     aux.printTittle(" -----------------------------------  6. Evaluacion del hijo (Castigo)")
 
-    child.set_fenotype(aux.punish_individual(child,knapsack))   #Si el individuo es factible, no resulta castigado.
-    aux.print_individual_info("HijoEvaluado:", child)
+    if knapsack.evaluativeMethod == "p":
+        child.set_fenotype(aux.punish_individual(child,knapsack))   #Si el individuo es factible, no resulta castigado.
+        aux.print_individual_info("HijoEvaluado:", child)
+    
+    elif knapsack.evaluativeMethod == "r":
+        child = aux.repair_individual(child,knapsack)
+
 
     aux.printTittle(" ----------------------------------- 7. Actualizar la población")
 
-    POPULATION.individuals = aux.try_update_population(POPULATION, child) #Se intenta actualizar la población con el hijo (Si es hijo no es mejor que el peor de la población, se falla el intento y no se actualiza nada.)
+    POPULATION.individualsGenotypes = aux.try_update_population(POPULATION, child) #Se intenta actualizar la población con el hijo (Si es hijo no es mejor que el peor de la población, se falla el intento y no se actualiza nada.)
     aux.print_population_info(POPULATION)
 
     '''
@@ -78,7 +89,7 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack):
     aux.printTittle(" ----------------------------------- 8. Incumbente de la población")
 
     icmbt_index = aux.get_best_individual_index(POPULATION)
-    incumbent = Individual(POPULATION.individuals[icmbt_index])
+    incumbent = Individual(POPULATION.individualsGenotypes[icmbt_index])
     incumbent.set_fenotype(aux.calculate_ObjFuncVector(incumbent,knapsack))
     incumbent.set_weight(aux.calculate_WeightVector(incumbent,knapsack))
     aux.print_individual_info("Incumbente", incumbent)    
@@ -104,8 +115,9 @@ def main():
     MaxCapacity = 110
     mutationRate = 0.02
     crossingRate = 0.8
+    evaluativeMethod = "r"
 
-    knapsack = KnapSack(KnapsackItemsQuantity, SolutionsQuantity, ItemsBeneficits, ItemsWeights, MaxCapacity, crossingRate, mutationRate)
+    knapsack = KnapSack(KnapsackItemsQuantity, SolutionsQuantity, ItemsBeneficits, ItemsWeights, MaxCapacity, crossingRate, mutationRate, evaluativeMethod)
     aux.print_knapsack_info(knapsack)
     
     POPULATION = Population(knapsack)  

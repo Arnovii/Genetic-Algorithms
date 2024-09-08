@@ -4,7 +4,7 @@ import numpy as np
 class Population():
     def __init__(self, knapsack: KnapSack):
         self.knapsack = knapsack                    #       columnas    ,   filas
-        self.individuals = np.random.randint(0,2,(knapsack.ItemsQuantity, knapsack.IndividualsQuantity))
+        self.individualsGenotypes = np.random.randint(0,2,(knapsack.ItemsQuantity, knapsack.IndividualsQuantity))
         self.individualsObjetiveFunctions = None
         self. individualsWeights = None
         self.genotypeLength = knapsack.ItemsQuantity
