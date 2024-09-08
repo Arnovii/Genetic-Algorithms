@@ -242,12 +242,22 @@ class AuxiliarFunctions:
 #Codificar los metodos generateItemsWeights generateItemsBeneficits generateMaxCapacity
 
     def generateItemsWeightsVector(self, possibleValues: np.ndarray, length: int):
-        print(type(possibleValues), length)
-        return possibleValues
+        """
+        Genera un numpy.ndarray de 'length' elementos seleccionados aleatoriamente
+        de 'possibleValues' que contiene los posibles valores para el vector de pesos.
+        """
+        # Selecciona aleatoriamente 'length' valores del conjunto posible
+        weights_vector = np.random.choice(possibleValues, size=length, replace=True)
+        return weights_vector
     
     def generateItemsBeneficitsVector(self, possibleValues: np.ndarray, length: int):
-        print(type(possibleValues), length)
-        return possibleValues
+        """
+        Genera un numpy.ndarray de 'length' elementos seleccionados aleatoriamente
+        de 'possibleValues' que contiene los posibles valores para el vector de beneficios.
+        """
+        # Selecciona aleatoriamente 'length' valores del conjunto posible
+        beneficits_vector = np.random.choice(possibleValues, size=length, replace=True)
+        return beneficits_vector
     
     def generateMaxCapacity(self, itemsWeight: np.ndarray, alpha: float):
         maxCapacity = np.cumsum(itemsWeight)*alpha

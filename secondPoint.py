@@ -52,8 +52,44 @@ def knapsack_instances(data:dict) -> KnapSack:
                   )
     return ks
 
-def cycle_of_life(POPULATION, KNAPSACK, evaluativeMethod) -> Individual:
-    pass
+
+def cycle_of_life(POPULATION:Population, knapsack:KnapSack) -> Individual:
+    np.random.seed(0) #Para mantener estático el mismo caso. 
+    if knapsack.evaluativeMethod == "p":
+        adaptativeFunction = aux.punish_population(POPULATION, knapsack)
+        POPULATION.set_individuals_objFunc(adaptativeFunction)
+        aux.print_punishment_population_info(POPULATION)
+    elif knapsack.evaluativeMethod == "r":
+        POPULATION = aux.repairPopulation(POPULATION,knapsack)
+        aux.print_punishment_population_info(POPULATION)
+
+    indexParent1 = aux.get_parent_index_roulette(POPULATION.individualsObjetiveFunctions, 0)
+    indexParent2 = aux.get_parent_index_roulette(POPULATION.individualsObjetiveFunctions, 1)
+    parent1 = Individual(POPULATION.individualsGenotypes[indexParent1])
+    parent2 = Individual(POPULATION.individualsGenotypes[indexParent2])
+
+    child = Individual(aux.cross_parents_upx(parent1, parent2, 0))
+    child.set_fenotype(aux.calculate_ObjFuncVector(child, knapsack))
+    child.set_weight(aux.calculate_WeightVector(child, knapsack))
+
+    child.set_genotype(aux.mutate_binary_individual(child, knapsack.mutationRate, 0))  
+    child.set_fenotype(aux.calculate_ObjFuncVector(child,knapsack))
+    child.set_weight(aux.calculate_WeightVector(child,knapsack))
+
+    if knapsack.evaluativeMethod == "p":
+        child.set_fenotype(aux.punish_individual(child,knapsack))   #Si el individuo es factible, no resulta castigado.
+    elif knapsack.evaluativeMethod == "r":
+        child = aux.repair_individual(child,knapsack)
+
+    POPULATION.individualsGenotypes = aux.try_update_population(POPULATION, child) #Se intenta actualizar la población con el hijo (Si es hijo no es mejor que el peor de la población, se falla el intento y no se actualiza nada.)
+
+    icmbt_index = aux.get_best_individual_index(POPULATION)
+    incumbent = Individual(POPULATION.individualsGenotypes[icmbt_index])
+    incumbent.set_fenotype(aux.calculate_ObjFuncVector(incumbent,knapsack))
+    incumbent.set_weight(aux.calculate_WeightVector(incumbent,knapsack))
+    aux.print_individual_info("Incumbente", incumbent)    
+
+    return incumbent
 
 
 def main() -> None:
@@ -62,7 +98,14 @@ def main() -> None:
     debugMode and print(prmtrsInfo[option])
 
     KNAPSACK = knapsack_instances(prmtrsInfo[option])
+
     POPULATION = Population(KNAPSACK)
+    print(POPULATION.individualsGenotypes.shape)
+    print(KNAPSACK.ItemsBeneficits.shape)
+    print(KNAPSACK.ItemsWeights.shape)
+    input()
+    POPULATION.set_individuals_objFunc(aux.calculate_ObjFuncVector(POPULATION, KNAPSACK))   
+    POPULATION.set_individuals_weights(aux.calculate_WeightVector(POPULATION, KNAPSACK))
 
     generations = KNAPSACK.crossingRate*KNAPSACK.IndividualsQuantity #retorna 4
 

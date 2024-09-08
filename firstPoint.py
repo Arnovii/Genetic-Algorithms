@@ -123,6 +123,12 @@ def main():
     POPULATION = Population(knapsack)  
     POPULATION.set_individuals_objFunc(aux.calculate_ObjFuncVector(POPULATION, knapsack))   
     POPULATION.set_individuals_weights(aux.calculate_WeightVector(POPULATION, knapsack))
+
+    print(POPULATION.individualsGenotypes.shape)
+    print(knapsack.ItemsBeneficits.shape)
+    print(knapsack.ItemsWeights.shape)
+    input()
+    
     aux.print_population_info(POPULATION)
     
     
