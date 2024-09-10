@@ -106,8 +106,8 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack) -> Individual:
 
     icmbt_index = aux.get_best_individual_index(POPULATION)
     incumbent = Individual(POPULATION.individualsGenotypes[icmbt_index])
-    incumbent.set_fenotype(aux.calculate_ObjFuncVector(incumbent,knapsack))
-    incumbent.set_weight(aux.calculate_WeightVector(incumbent,knapsack))
+    incumbent.set_fenotype(POPULATION.individualsObjetiveFunctions[icmbt_index])
+    incumbent.set_weight(POPULATION.individualsWeights[icmbt_index])
 
     debugMode and print("\n[red]Poblacion al final de la generación...\n")
     aux.print_population_info(POPULATION)

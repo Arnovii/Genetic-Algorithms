@@ -118,10 +118,11 @@ class AuxiliarFunctions:
             finalList.append(itemList)
         adaptFuncArray = np.array(finalList)
         
-        if (pop.individualsObjetiveFunctions.all() == adaptFuncArray.all()):
+        if np.array_equal(ObjFuncArray, adaptFuncArray):
             print("[green]The population haven't been punished")
-        else: 
-            print("[red]The population haven been punished")
+        else:
+            print("[red]The population have been punished")
+            
         return adaptFuncArray
 
 
