@@ -34,9 +34,9 @@ def select_option(prmtrsInfo: dict) -> str:
 
 def get_knapsack_instance(data:dict) -> KnapSack:
 
-    weights = aux.generateItemsWeightsVector(data["w_range"], data["n"])
-    beneficits = aux.generateItemsBeneficitsVector(data["b_range"], data["n"])
-    capacity = aux.generateMaxCapacity(weights, data["alpha"])
+    weights = aux.generate_items_weights_vector(data["w_range"], data["n"])
+    beneficits = aux.generate_items_beneficits_vector(data["b_range"], data["n"])
+    capacity = aux.generate_max_capacity(weights, data["alpha"])
 
     ks = KnapSack(ItemsQuantity= data["n"],                         #Longitud de los individuos
                   IndividualsQuantity= data["N"],                   #Cantidad de los individuos
@@ -108,8 +108,6 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack) -> Individual:
     incumbent = Individual(POPULATION.individualsGenotypes[icmbt_index])
     incumbent.set_fenotype(aux.calculate_ObjFuncVector(incumbent,knapsack))
     incumbent.set_weight(aux.calculate_WeightVector(incumbent,knapsack))
-    # incumbent.set_fenotype(POPULATION.individualsObjetiveFunctions[icmbt_index])
-    # incumbent.set_weight(POPULATION.individualsWeights[icmbt_index])
 
     debugMode and print("\n[red]Poblacion al final de la generación...\n")
     aux.print_population_info(POPULATION)
@@ -159,9 +157,6 @@ def main() -> None:
     print(f"Execute time: {execution_time:.4f} seconds") 
     plt.show()
  
-
-
-
 
 main()
 

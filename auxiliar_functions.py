@@ -70,7 +70,7 @@ class AuxiliarFunctions:
         knapsackEvaluativeMethod = knapsack.evaluativeMethod
         print(f"[yellow]\tknapsackMaxCapacity: \t\t[green] {knapsackMaxCapacity}")
         print(f"[yellow]\tNumber of gens: \t\t[green] {numberOfGens}")
-        print("[yellow]\tItems: \t\t\t\t ", end="")
+        print("[yellow]\tIndividuals: \t\t\t ", end="")
         for item in range(1, numberOfIndividuals + 1):
             print(f"[green]{item}", end=" ")
         
@@ -241,7 +241,7 @@ class AuxiliarFunctions:
 #-------------------------------------- Second Point
 #Codificar los metodos generateItemsWeights generateItemsBeneficits generateMaxCapacity
 
-    def generateItemsWeightsVector(self, possibleValues: np.ndarray, length: int):
+    def generate_items_weights_vector(self, possibleValues: np.ndarray, length: int):
         """
         Genera un numpy.ndarray de 'length' elementos seleccionados aleatoriamente
         de 'possibleValues' que contiene los posibles valores para el vector de pesos.
@@ -250,7 +250,7 @@ class AuxiliarFunctions:
         weights_vector = np.random.choice(possibleValues, size=length, replace=True)
         return weights_vector
     
-    def generateItemsBeneficitsVector(self, possibleValues: np.ndarray, length: int):
+    def generate_items_beneficits_vector(self, possibleValues: np.ndarray, length: int):
         """
         Genera un numpy.ndarray de 'length' elementos seleccionados aleatoriamente
         de 'possibleValues' que contiene los posibles valores para el vector de beneficios.
@@ -259,7 +259,7 @@ class AuxiliarFunctions:
         beneficits_vector = np.random.choice(possibleValues, size=length, replace=True)
         return beneficits_vector
     
-    def generateMaxCapacity(self, itemsWeight: np.ndarray, alpha: float) -> float:
+    def generate_max_capacity(self, itemsWeight: np.ndarray, alpha: float) -> float:
         maxCapacity = (np.sum(itemsWeight))*alpha
         return maxCapacity
 
