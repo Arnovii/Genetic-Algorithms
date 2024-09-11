@@ -159,28 +159,38 @@ def main() -> None:
     # Dibujar la línea en lugar de solo puntos
     plt.plot(generations_list, fenotype_list, marker='o', linestyle='-', color='b')
 
+    title = f"Generaciones vs Función Objetivo - Caso: {option} (N: {prmtrsInfo[option]['N']}, n: {prmtrsInfo[option]['n']})"
+    plt.title(title)  # Agrega el título dinámico
     plt.xlabel('$generations$')
     plt.ylabel('$objectiveFunction$')
     plt.grid()
     end_time = time.time()
     execution_time = end_time - start_time
+    
 
-    # # Determinamos al mejor incumbente de toda la generación 
-    # BestIncumbentIndex = np.argmax(fenotype_list)
+
+    # Determinamos al mejor incumbente de toda la generación 
+    BestIncumbentIndex = np.argmax(fenotype_list)
     # print(np.argmax(fenotype_list))
     # print(Individual(POPULATION.individualsGenotypes[np.argmax(fenotype_list)]).genotype)
     # print("fenotipo:", fenotype_list[np.argmax(fenotype_list)])
-    # input()
-    # BestIncumbent = Individual(POPULATION.individualsGenotypes[BestIncumbentIndex])
+    BestIncumbent = Individual(POPULATION.individualsGenotypes[BestIncumbentIndex])
     # BestIncumbent.set_fenotype = fenotype_list[BestIncumbentIndex]
     # BestIncumbent.set_weight = aux.calculate_WeightVector(BestIncumbent,KNAPSACK)
     
-    # aux.print_individual_info("El Mejor", BestIncumbent)
-
+    
+    print("[green]La mejor solución es: \n")
+    print(f"[yellow]Genotipo: [white]{BestIncumbent.genotype}")
+    print(f"[yellow]Fenotipo: [white]{fenotype_list[BestIncumbentIndex]}")
+    print(f"[yellow]Genotipo: [white]{aux.calculate_WeightVector(BestIncumbent,KNAPSACK)}")
     print("[green]\n\n--FIN--")
 
     print(f"Execute time: {execution_time:.4f} seconds") 
-    plt.show()
+    plt.show(block=False)
+    
+    # Mantener la ventana gráfica abierta hasta que el usuario presione Enter
+    input("Presiona Enter para cerrar la gráfica y finalizar...")
+
  
 
 main()
