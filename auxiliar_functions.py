@@ -106,19 +106,19 @@ class AuxiliarFunctions:
         else: print("[green]The individial hasn't been punished")
         return AdapFunc
 
-    def w_m_c(self, weightIndividual, knapsackCapacity):
+    def w_m_c(self, weightIndividual, knapsackCapacity) -> bool:
         return 1 if weightIndividual > knapsackCapacity else 0
         
     def punish_population(self, pop: Population, ks: KnapSack) ->np.ndarray:
-        ObjFuncArray, WeightArray, maxCapacityKnapsack = pop.individualsObjetiveFunctions, pop.individualsWeights, ks.MaxCapacity
         finalList = []
-        for index, O_F in enumerate(ObjFuncArray):
-            individualWeight = WeightArray[index]
-            itemList = O_F - individualWeight * self.w_m_c(individualWeight, maxCapacityKnapsack)
+        for index, individualObjFunc in enumerate(pop.individualsObjetiveFunctions):
+            individualWeight = pop.individualsWeights[index]
+            #fa(x)   =  f(x)             − αw(x)            * (w(x) > C)
+            itemList = individualObjFunc - individualWeight * self.w_m_c(individualWeight, ks.MaxCapacity)
             finalList.append(itemList)
         adaptFuncArray = np.array(finalList)
         
-        if np.array_equal(ObjFuncArray, adaptFuncArray):
+        if np.array_equal( pop.individualsObjetiveFunctions, adaptFuncArray):
             print("[green]The population haven't been punished")
         else:
             print("[red]The population have been punished")
@@ -135,8 +135,8 @@ class AuxiliarFunctions:
     
     def repair_individual(self, ind: Individual, ks: KnapSack) -> Individual:
         while ind.weight > ks.MaxCapacity:
-            randomGen = np.random.randint(0, ind.genotype.size)
-            ind.genotype[randomGen] = 0
+            indexRandomGen = np.random.randint(0, ind.genotype.size)
+            ind.genotype[indexRandomGen] = 0
             ind.set_weight(self.calculate_WeightVector(ind, ks))
             ind.set_fenotype(self.calculate_ObjFuncVector(ind,ks)) #Con esto nos aseguramos que el individuo retornado esté totalmente actualizado tanto en peso como en fenotipo
         return ind
@@ -155,10 +155,10 @@ class AuxiliarFunctions:
         return tempIndv.genotype
 
     def repairPopulation(self, pop:Population, ks:KnapSack) -> Population:
-        for index, indGenotype in enumerate(pop.individualsGenotypes):
+        for index, indivGenotype in enumerate(pop.individualsGenotypes):
             individualWeight = pop.individualsWeights[index]
             if individualWeight > ks.MaxCapacity:
-                pop.individualsGenotypes[index] = self.repair_individual_for_genotype(indGenotype,ks)
+                pop.individualsGenotypes[index] = self.repair_individual_for_genotype(indivGenotype,ks)
         
         #Cuando termine el ciclo, es porque todos los genotipos se han reparado, es momento de actualizar los vectores de beneficio y peso
         pop.set_individuals_objFunc(self.calculate_ObjFuncVector(pop,ks))
@@ -169,13 +169,13 @@ class AuxiliarFunctions:
 
 #-------------------------------------- Parents Selection
 
-    def get_parent_index_random(self, KnapsackItemQuantity, randomSeed: int):
+    def get_parent_index_random(self, KnapsackItemQuantity):
         return np.random.randint(0, KnapsackItemQuantity)
 
-    def get_parent_index_roulette(self, ObjFuncPop, randomSeed: int):
+    def get_parent_index_roulette(self, ObjFuncPop):
         proportionsForPop = ObjFuncPop / np.sum(ObjFuncPop)
         acumulatedProportionsForPop = np.cumsum(proportionsForPop)
-        np.random.seed(randomSeed)
+
         AP = np.random.rand()
         conditionList = acumulatedProportionsForPop < AP
         parentIndex = np.argmin(conditionList)
@@ -183,9 +183,8 @@ class AuxiliarFunctions:
 
 #-------------------------------------- Crossing 
 
-    def cross_parents_upx(self, p1, p2, randomSeed: int) -> np.ndarray:
+    def cross_parents_upx(self, p1, p2) -> np.ndarray:
         parent1, parent2 = p1.genotype, p2.genotype 
-        np.random.seed(randomSeed)
         genotypeLength = parent1.size
         mask = np.random.randint(0, 2, genotypeLength)
         parent1 = parent1.tolist()
@@ -201,8 +200,7 @@ class AuxiliarFunctions:
 
 #-------------------------------------- Mutation
 
-    def mutate_binary_individual(self, indiv: Individual, MutationRate, RandomSeed: int):
-        np.random.seed(RandomSeed)
+    def mutate_binary_individual(self, indiv: Individual, MutationRate:float):
         randomProbability = np.random.rand()
         
         if randomProbability < MutationRate:
@@ -225,7 +223,7 @@ class AuxiliarFunctions:
         print("[blue]Índice peor individuo: ", index)
 
         if child.fenotype > pop.individualsObjetiveFunctions[index]:
-            print("[green]The generation was improved")
+            print("[green]The population has been improved")
             pop.individualsGenotypes[index] = child.genotype
             pop.individualsObjetiveFunctions[index] = child.fenotype
             pop.individualsWeights[index] = child.weight

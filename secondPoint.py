@@ -69,12 +69,16 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack) -> Individual:
         debugMode and input()
 
 
-    indexParent1 = aux.get_parent_index_roulette(POPULATION.individualsObjetiveFunctions, 0)
-    indexParent2 = aux.get_parent_index_roulette(POPULATION.individualsObjetiveFunctions, 1)
+    indexParent1 = aux.get_parent_index_roulette(POPULATION.individualsObjetiveFunctions)
+    indexParent2 = aux.get_parent_index_roulette(POPULATION.individualsObjetiveFunctions)
     parent1 = Individual(POPULATION.individualsGenotypes[indexParent1])
     parent2 = Individual(POPULATION.individualsGenotypes[indexParent2])
 
-    child = Individual(aux.cross_parents_upx(parent1, parent2, 0))
+    debugMode and aux.print_individual_info("Padre1", parent1)
+    debugMode and aux.print_individual_info("Padre2", parent2)
+    debugMode and input()
+
+    child = Individual(aux.cross_parents_upx(parent1, parent2))
     child.set_fenotype(aux.calculate_ObjFuncVector(child, knapsack))
     child.set_weight(aux.calculate_WeightVector(child, knapsack))
 
@@ -82,7 +86,7 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack) -> Individual:
     debugMode and aux.print_individual_info("child\t", child)
     debugMode and input()
 
-    child.set_genotype(aux.mutate_binary_individual(child, knapsack.mutationRate, 0))  
+    child.set_genotype(aux.mutate_binary_individual(child, knapsack.mutationRate))  
     child.set_fenotype(aux.calculate_ObjFuncVector(child,knapsack))
     child.set_weight(aux.calculate_WeightVector(child,knapsack))
 
@@ -120,8 +124,8 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack) -> Individual:
 
 
 def main() -> None:
-    np.random.seed(565456) #Esta semilla el caso "0" tiene una leve variación
-
+    np.random.seed(565457) #Esta semilla el caso "0" tiene una leve variación
+    
     prmtrsInfo = ParametersInformation.data
     option = select_option(prmtrsInfo)
     start_time = time.time()
@@ -135,16 +139,22 @@ def main() -> None:
     POPULATION.set_individuals_weights(aux.calculate_WeightVector(POPULATION, KNAPSACK))
 
 
-    generations = KNAPSACK.crossingRate*KNAPSACK.IndividualsQuantity #retorna 4
+    generations = KNAPSACK.crossingRate*KNAPSACK.IndividualsQuantity
+    
     # Listas para almacenar las generaciones y sus fenotipos
     generations_list = []
     fenotype_list = []
     print(f"[yellow]\n\nEl porcentaje de cruzamiento es: [cyan]{KNAPSACK.crossingRate*100}%,[yellow] con una población total de: [cyan]{KNAPSACK.IndividualsQuantity},[yellow] la cantidad de generaciones seran: [cyan]{KNAPSACK.crossingRate*KNAPSACK.IndividualsQuantity}\n", )
 
+    
     for i in range(int(generations)):
-        icmbt_index = cycle_of_life(POPULATION, KNAPSACK)
+        np.random.seed(i)
+        num = np.random.randint(i+1)
+        np.random.seed(num)
+        Incumbent = cycle_of_life(POPULATION, KNAPSACK)
         generations_list.append(i)
-        fenotype_list.append(icmbt_index.fenotype)
+        fenotype_list.append(Incumbent.fenotype)
+
 
     # Dibujar la línea en lugar de solo puntos
     plt.plot(generations_list, fenotype_list, marker='o', linestyle='-', color='b')
@@ -154,6 +164,21 @@ def main() -> None:
     plt.grid()
     end_time = time.time()
     execution_time = end_time - start_time
+
+    # # Determinamos al mejor incumbente de toda la generación 
+    # BestIncumbentIndex = np.argmax(fenotype_list)
+    # print(np.argmax(fenotype_list))
+    # print(Individual(POPULATION.individualsGenotypes[np.argmax(fenotype_list)]).genotype)
+    # print("fenotipo:", fenotype_list[np.argmax(fenotype_list)])
+    # input()
+    # BestIncumbent = Individual(POPULATION.individualsGenotypes[BestIncumbentIndex])
+    # BestIncumbent.set_fenotype = fenotype_list[BestIncumbentIndex]
+    # BestIncumbent.set_weight = aux.calculate_WeightVector(BestIncumbent,KNAPSACK)
+    
+    # aux.print_individual_info("El Mejor", BestIncumbent)
+
+    print("[green]\n\n--FIN--")
+
     print(f"Execute time: {execution_time:.4f} seconds") 
     plt.show()
  

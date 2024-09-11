@@ -3,9 +3,9 @@ import numpy as np
 class ParametersInformation:
     data = {
         "0": {
-            "N":                    10,        #individualsQuantity
-            "n":                    5,        #genotypeLength
-            "evaluativeMethod":     "p",        #Reparation
+            "N":                    10,         #individualsQuantity
+            "n":                    5,          #genotypeLength
+            "evaluativeMethod":     "p",        #Punishment
             "alpha":                1/2,        #α
             "w_range":              np.arange(1,21),     
             "b_range":              np.arange(10, 101),

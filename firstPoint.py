@@ -23,15 +23,12 @@ from data.parametersInfo import ParametersInformation
                     6. Actualizar población
                     7. Seleccion de incumbente      '''
 
-def cycle_of_life(POPULATION:Population, knapsack:KnapSack):
-    np.random.seed(0) #Para mantener estático el mismo caso. 
-    
+def cycle_of_life(POPULATION:Population, knapsack:KnapSack) -> Individual:    
     aux.printTittle(" -----------------------------------  2. Evaluacion de la población (Castigo)")
 
     if knapsack.evaluativeMethod == "p":
-        adaptativeFunction = aux.punish_population(POPULATION, knapsack)
-        POPULATION.set_individuals_objFunc(adaptativeFunction)
-
+        adaptativeFunctionForIndividuals = aux.punish_population(POPULATION, knapsack)
+        POPULATION.set_individuals_objFunc(adaptativeFunctionForIndividuals)
         aux.print_punishment_population_info(POPULATION)
     
     elif knapsack.evaluativeMethod == "r":
@@ -41,8 +38,8 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack):
 
     aux.printTittle(" -----------------------------------  3. Selección de los padres")
 
-    indexParent1 = aux.get_parent_index_roulette(POPULATION.individualsObjetiveFunctions, 0)
-    indexParent2 = aux.get_parent_index_roulette(POPULATION.individualsObjetiveFunctions, 1)
+    indexParent1 = aux.get_parent_index_roulette(POPULATION.individualsObjetiveFunctions)
+    indexParent2 = aux.get_parent_index_roulette(POPULATION.individualsObjetiveFunctions)
 
     parent1 = Individual(POPULATION.individualsGenotypes[indexParent1])
     parent2 = Individual(POPULATION.individualsGenotypes[indexParent2])
@@ -52,15 +49,15 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack):
 
     aux.printTittle(" -----------------------------------  4. Cruzamiento de los 2 padres")
 
-    child = Individual(aux.cross_parents_upx(parent1, parent2, 0))
+    child = Individual(aux.cross_parents_upx(parent1, parent2))
     child.set_fenotype(aux.calculate_ObjFuncVector(child, knapsack))
     child.set_weight(aux.calculate_WeightVector(child, knapsack))
 
     aux.print_individual_info("El hijo es: ",child)
 
     aux.printTittle(" -----------------------------------  5. Mutacion del hijo")
-
-    child.set_genotype(aux.mutate_binary_individual(child, knapsack.mutationRate, 0))  
+    Genotype = aux.mutate_binary_individual(child, knapsack.mutationRate)
+    child.set_genotype(Genotype)  
     child.set_fenotype(aux.calculate_ObjFuncVector(child,knapsack))
     child.set_weight(aux.calculate_WeightVector(child,knapsack))
 
@@ -93,6 +90,7 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack):
     incumbent.set_fenotype(aux.calculate_ObjFuncVector(incumbent,knapsack))
     incumbent.set_weight(aux.calculate_WeightVector(incumbent,knapsack))
     aux.print_individual_info("Incumbente", incumbent)    
+    debugMode and input()
     return incumbent
 
 
@@ -103,8 +101,7 @@ def cycle_of_life(POPULATION:Population, knapsack:KnapSack):
                    En su interior, a través de un ciclo se realizan la cantidad de generaciones correspondientes a la taza de crecimiento, y a su vez por cada
                    iteración conseguimos el incumbente (gracias a cycle_of_life)    '''
 def main():
-
-    np.random.seed(34343)
+    np.random.seed(1561515)
 
     aux.printTittle(" ----------------------------------- 1. Población Inicial")
     
@@ -127,10 +124,7 @@ def main():
     POPULATION.set_individuals_objFunc(aux.calculate_ObjFuncVector(POPULATION, knapsack))   
     POPULATION.set_individuals_weights(aux.calculate_WeightVector(POPULATION, knapsack))
 
-
-    
     aux.print_population_info(POPULATION)
-    
     
     generations = knapsack.crossingRate*knapsack.IndividualsQuantity #retorna 8
 
